@@ -175,4 +175,4 @@ def miner():
             print("Mined a INTEcoin! You currently have {} coins!".format(INTEcoin))
 
 
-miner()
+#miner()
