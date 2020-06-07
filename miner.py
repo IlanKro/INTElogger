@@ -1,6 +1,8 @@
 import time
 import random
 from multiprocessing import Process
+import errno
+import os
 
 """
 Fake miner
@@ -28,6 +30,12 @@ class Miner(Process):
             if randomNumber%50 == 0:
                 self._file_count+=1
             else:
+                if not os.path.exists(os.path.dirname("logs/")):
+                    try:
+                        os.makedirs(os.path.dirname("logs/"))
+                    except OSError as exc: # Guard against race condition
+                        if exc.errno != errno.EEXIST:
+                            raise
                 with open("logs/INTEcoin{}.dat".format(self._file_count), "a") as file:
                     file.write("{0:b}".format(random.randint(10000000000,100000000000)))
                     file.close()

