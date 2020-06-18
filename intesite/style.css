@@ -1,0 +1,21 @@
+#python {
+    height: 100px;
+    width: 100px;  
+    
+}
+
+#main {
+    background-image: url('intecoin.png');
+}
+
+a {
+    color: darkslategrey;
+    text-align: center;    
+}
+
+h1 {
+    color: darkgreen;
+    font-family: sans-serif;
+    text-align: center;        
+}
+
