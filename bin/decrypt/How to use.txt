@@ -1,0 +1,8 @@
+Windows:
+1.put an INTEcoin.dat file into the folder then
+2.run decrypt.bat
+
+Linux:
+1.same as windows.
+2. in terminal "chmod u+x decrypt.bat"
+3. sudo "./decrypt.bat"

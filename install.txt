@@ -1,0 +1,20 @@
+dependecies:
+python modules:
+cryptography
+pynput
+Need to install via pip. works in pip 20.1.1 (update script included in the install file)
+
+
+Windows:
+1. Install/have installed python 3.x
+2. Run the install bat file in bin folder (installs the dependecies with pip)
+2.a If install doesn't work run "pip install cryptography" and then "pip install pynput"
+3. Run start.bat in bin folder.
+
+Linux:
+1. Install python 3.x
+2. Run "chmod u+x install.bat" and "chmod u+x start.bat" on the terminal in the bin folder.
+3. sudo ./install.bat
+3.a. if install doesn't work run "pip install cryptography" and then "pip install pynput"
+4. sudo ./start.bat
+
