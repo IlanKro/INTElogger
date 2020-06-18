@@ -1,5 +1,5 @@
 Windows:
-1.put an INTEcoin.dat file into the folder then
+1.put an INTEcoin.dat file into this folder
 2.run decrypt.bat
 
 Linux:

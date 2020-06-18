@@ -1,1 +1,1 @@
-python decrypt.py
+python ../../src/decrypt.py
